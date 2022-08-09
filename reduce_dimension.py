@@ -11,6 +11,8 @@ from sklearn.decomposition import KernelPCA
 from sklearn.decomposition import SparsePCA
 from sklearn.decomposition import TruncatedSVD
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+from yellowbrick.classifier import PrecisionRecallCurve
+from sklearn.multiclass import OneVsRestClassifier
 import pandas as pd
 import numpy as np
 from sklearn.manifold import TSNE
@@ -133,3 +135,37 @@ def run_pipeline(data, label, output_path, n, key):
 
 # Testing
 # run_pipeline('scaled_training_data_sample_official.csv', 'scaled_training_label_sample_official.csv', 'Truncated_SVD_output.csv', 100, 10)
+
+# Train model on one-vs-all classification and graph PRC curve
+def run_model_prc(pc_file, label_file, graph_output):
+    X = pd.read_csv(pc_file, index_col=0)
+    df_label = pd.read_csv(label_file, index_col=0)
+    y = np.ravel(df_label["cell_type"])
+    from collections import Counter
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.1, random_state=42
+    )
+    print(Counter(y_train))
+    print("-------------------------")
+    print(Counter(y_test))
+    model = LogisticRegression()
+    model_ova = OneVsRestClassifier(model)
+    model_ova.fit(X_train, y_train)
+
+    prc_lg = PrecisionRecallCurve(
+        model_ova,
+        classes=model_ova.classes_,
+        iso_f1_curves=True,
+        per_class=True,
+        micro=False,
+        size=(1000, 800),
+    )
+    prc_lg.fit(X_train, y_train)
+    prc_lg.score(X_test, y_test)
+    prc_lg.show(outpath=graph_output)
+    print(str(pc_file))
+    print("Score :", model_ova.score(X_test, y_test))
+
+
+# run_model_prc('LDA_output.csv', 'scaled_training_label_sample_official.csv', 'PRC_LDA.png')
