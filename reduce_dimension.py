@@ -88,6 +88,10 @@ def dimensionality_reduce(data, label_data, n_dimension, method_key):
     elif method_key == 9:
         lda = LDA(n_components=n_dimension)
         X_np = lda.fit_transform(df, get_label(label_data))
+        
+        # Generate loadings matrix (coefficients)
+        loadings = pd.DataFrame(lda.coef_)
+        loadings.to_csv('LDA_loadings.csv')
 
     # Truncated SVD
     else:
