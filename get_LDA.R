@@ -3,6 +3,7 @@ library(MASS)
 ## This script is to perform linear discriminant analysis (LDA) for dimensionality reudction
 ## and obtain the loadings of LDA to conduct projection 
 ## Return the list containg two objects: the output of LDA (%predictions) and the loadings (%loadings)
+## Save output and loadings as CSV file
 
 get_LDA <- function(scaled_training) {
   data <- read.csv(scaled_training)
@@ -19,7 +20,7 @@ get_LDA <- function(scaled_training) {
   write.csv(loadings, "LDA_loadings_R.csv")
 
   newlist <- list(predictions = predictions,loadings = loadings)
-  
+
   return(newlist)
 
 }
